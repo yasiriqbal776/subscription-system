@@ -1,50 +1,35 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
 import GraphQLJSON, { GraphQLJSONObject } from 'graphql-type-json';
 import _ from 'lodash';
-import { LoggerModule } from 'nestjs-pino';
 
-import { config as appConfig } from './config/app.config';
+import { ConfigModule } from './config/config.module';
+import { servicesContainer } from './services/inversify.config';
+import { ServicesModule } from './services/service.module';
+import { SubscriptionPlanService } from './services/SubscriptionPlan/subscription_plan.service';
 import { HttpExceptionFilter } from './shared/exception-filter/http-exception.filter';
 import { TimeoutInterceptor } from './shared/interceptor/timeout.interceptor';
 import schemaDirectives from './shared/schema-directive/index';
 
 @Module({
   imports: [
-    LoggerModule.forRoot({
-      pinoHttp: [
-        {
-          level: process.env.NODE_ENV !== 'production' ? 'debug' : 'info',
-          nestedKey: 'subscriptionService',
-          redact: {
-            paths: ['req', 'res', 'hostname', 'pid'],
-            remove: true,
-          },
-        },
-      ],
-      exclude: ['graphql'],
-    } as any),
-    ConfigModule.forRoot({
-      isGlobal: true,
-      load: [appConfig],
-    }),
-
+    ConfigModule,
+    ServicesModule,
     GraphQLModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
+      useFactory: () => ({
         schemaDirectives,
         include: [],
         typePaths: ['./**/**/*.graphql'],
         installSubscriptionHandlers: true,
         context: ({ req }) => ({ req }),
         introspection: true,
-        debug: configService.get<string>('app.nodeEnv') === 'development',
-        engine: {
-          schemaTag: configService.get<string>('app.nodeEnv'),
-          apiKey: configService.get<string>('app.apolloEngineApiKey'),
-        },
+        // debug: configService.get<string>('app.nodeEnv') === 'development',
+        // engine: {
+        //   schemaTag: configService.get<string>('app.nodeEnv'),
+        //   apiKey: configService.get<string>('app.apolloEngineApiKey'),
+        // },
         resolverValidationOptions: {
           requireResolversForResolveType: false,
         },
@@ -84,4 +69,25 @@ import schemaDirectives from './shared/schema-directive/index';
     },
   ],
 })
-export class AppModule {}
+export class AppModule {
+  constructor() {
+    // Debug the Insert operation
+    const s = servicesContainer.get<SubscriptionPlanService>(
+      SubscriptionPlanService,
+    );
+    void s.create({
+      name: 'Test',
+      invoice_duration: 'DAY',
+      invoice_period: 30,
+      price: 10,
+      code: '12312',
+      description: 'test',
+      trail_duration: 'DAY',
+      trail_period: 12,
+    });
+    // void s.findAll();
+    // void s.delete({ id: '257-A' });
+    // void s.findOne({ id: '257-A' });
+    // void s.update({ name: 'Test Update name1' }, { id: '353-A' });
+  }
+}
