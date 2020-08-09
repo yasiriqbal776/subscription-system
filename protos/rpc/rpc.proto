@@ -1,0 +1,16 @@
+syntax = "proto3";
+package rpc;
+
+import "rpc/subscription_plan.proto";
+
+service SubscriptionPlanService {
+
+  rpc FindAll(Empty) returns (ListSubscriptionPlans) {
+
+  }
+}
+message Empty {}
+
+message ListSubscriptionPlans {
+  repeated subscription_plan.SubscriptionPlan subscription_plans = 1;
+}

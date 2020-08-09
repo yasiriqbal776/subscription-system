@@ -4,6 +4,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { Transport } from '@nestjs/microservices';
 import {
   FastifyAdapter,
   NestFastifyApplication,
@@ -13,6 +14,7 @@ import cors from 'cors';
 import FastifyCompress from 'fastify-compress';
 import FastifyHelmet from 'fastify-helmet';
 import { FlubErrorHandler } from 'nestjs-flub';
+import { join } from 'path';
 
 import { AppModule } from './app.module';
 import { env } from './env';
@@ -81,6 +83,25 @@ export class AppDispatcher {
       );
     }
     this.app.useGlobalPipes(new ValidationPipe());
+    const protoDir = join(process.cwd(), 'protos');
+    this.app.connectMicroservice({
+      transport: Transport.GRPC,
+      options: {
+        url: '0.0.0.0:5000',
+        package: 'rpc',
+        protoPath: `${protoDir}/rpc/rpc.proto`,
+        loader: {
+          keepCase: true,
+          longs: Number,
+          defaults: false,
+          arrays: true,
+          objects: true,
+          includeDirs: [protoDir],
+        },
+      },
+    });
+
+    await this.app.startAllMicroservicesAsync();
   }
 
   /**
