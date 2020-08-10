@@ -84,10 +84,19 @@ export class AppDispatcher {
     }
     this.app.useGlobalPipes(new ValidationPipe());
     const protoDir = join(process.cwd(), 'protos');
+    // # TODO: Implement secure connection
+    // const credentials = grpc.ServerCredentials.createSsl(null, [
+    //   {
+    //     private_key: readFileSync(join(process.cwd(), 'certs/server.key')),
+    //     cert_chain: readFileSync(join(process.cwd(), 'certs/server.crt')),
+    //   },
+    // ] as any);
+
     this.app.connectMicroservice({
       transport: Transport.GRPC,
       options: {
-        url: '0.0.0.0:5000',
+        // credentials,
+        url: 'asim.grpc:5000',
         package: 'rpc',
         protoPath: `${protoDir}/rpc/rpc.proto`,
         loader: {
