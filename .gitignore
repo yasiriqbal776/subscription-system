@@ -398,3 +398,5 @@ yarn
 .vscode
 migrations
 free.bcdapps.client.certificate
+misc
+certs
