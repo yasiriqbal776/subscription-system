@@ -96,13 +96,15 @@ export class AppDispatcher {
       transport: Transport.GRPC,
       options: {
         // credentials,
-        url: 'asim.grpc:5000',
+        url: '0.0.0.0:5000',
         package: 'rpc',
         protoPath: `${protoDir}/rpc/rpc.proto`,
         loader: {
           keepCase: true,
           longs: Number,
-          defaults: false,
+          defaults: true,
+          oneofs: true,
+          enums: String,
           arrays: true,
           objects: true,
           includeDirs: [protoDir],

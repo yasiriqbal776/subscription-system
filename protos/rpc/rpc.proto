@@ -5,12 +5,16 @@ import "rpc/subscription_plan.proto";
 
 service SubscriptionPlanService {
 
-  rpc FindAll(Empty) returns (ListSubscriptionPlans) {
+  rpc FindAll(Empty) returns (subscription_plan.SubscriptionPlanResponse) {}
 
-  }
+  rpc FindOne(subscription_plan.SubscriptionPlanFilter) returns (subscription_plan.SubscriptionPlan){}
+
+  rpc Create(subscription_plan.SubscriptionPlanInput) returns (subscription_plan.SubscriptionPlan){}
+
+  rpc Update(subscription_plan.UpdateSubscriptionPlanRequest) returns (subscription_plan.UpdateSubscriptionPlanResponse){}
+
+  rpc Delete(subscription_plan.SubscriptionPlanFilter) returns (subscription_plan.DeleteSubscriptionPlanResponse){}
+
 }
 message Empty {}
 
-message ListSubscriptionPlans {
-  repeated subscription_plan.SubscriptionPlan subscription_plans = 1;
-}
